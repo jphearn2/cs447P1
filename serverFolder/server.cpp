@@ -15,12 +15,22 @@ int main(int argc, char *argv[]){
   
   cout << "Greetings Master\n";
 
-  int sockid, tcpPort, udpPort, client, n;
+  int tcpSock, tcpPort, udpPort, client, n;
 
-  struct sockaddr_in serv_addr, cli_addr;
-  sockid = socket(AF_INET, SOCK_STREAM, 0);
+  struct sockaddr_in tcp_addr, cli_addr;
+  tcpSock = socket(AF_INET, SOCK_STREAM, 0);
 
-  
+  tcpPort = atoi(argv[1]);
+  udpPort = atoi(argv[2]);
 
+  tcp_addr.sin_family = AF_INET;
+  tcp_addr.sin_port = htons(tcpPort);
+  tcp_addr.sin_addr.s_addr = INADDR_ANY;
+  if(bind(tcpSock, (struct sockaddr *) &tcp_addr, sizeof(tcp_addr)) < 0){
+    cout << "ERROR: binding error\n";
+  }
+
+  listen(tcpSock, 5);
+  cout << "after listen\n";
   return 0;
 }
