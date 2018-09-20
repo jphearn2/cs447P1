@@ -1,4 +1,4 @@
 all:
-	g++ -o test server.cpp
+	g++ -o test sendServer.cpp
 clean:
 	rm test

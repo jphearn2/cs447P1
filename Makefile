@@ -1,5 +1,6 @@
 all:
-	g++ -o server serverFolder/server.cpp
+	g++ -pthread -o sendServer serverFolder/sendServer.cpp
+	g++ -o sendClient clientFolder/sendClient.cpp
 
 clean:
-	rm server
+	rm sendServer sendClient
