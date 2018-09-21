@@ -17,7 +17,7 @@ static int parseCode(char buffer[], string * args);
 static bool validEmail(string * email);
 
 typedef struct email{
-  string from, to, subj, email;
+  string from, to, email;
 }email;
 
 int main(int argc, char *argv[]){
@@ -71,12 +71,14 @@ static int parse(char buffer[], string * args){
   indexL = responce.find("mail from");
   indexU = responce.find("MAIL FROM");
   if(indexL == 0 || indexU == 0){
+    *args = responce.substr(10);
     return 2;
   }
 
   indexL = responce.find("rcpt to");
   indexU = responce.find("RCPT TO");
   if(indexL == 0 || indexU == 0){
+    *args = responce.substr(8);
     return 3;
   }
 
@@ -102,7 +104,7 @@ static int parse(char buffer[], string * args){
 
 bool validEmail(string * email){
   regex r("<[a-zA-Z0-9]+@([a-zA-Z0-9]+\\.)+[a-zA-Z0-9]+>");
-
+  cout << *email << endl;
   if(regex_match(*email, r)){
     return true;
   }
@@ -111,6 +113,7 @@ bool validEmail(string * email){
 }
 
 void * connection(void * clientSock){
+  int i = 0;
   int client = *(int*) clientSock;
   int n, cmd;
   char buffer[1024];
@@ -216,6 +219,18 @@ void * connection(void * clientSock){
     n = write(client, "503 Closing connection", 1024);
     shutdown(client, SHUT_RDWR);
     return 0;
+  }
+
+  while(i < 2){
+    bzero(buffer, 1024);
+    n = read(client, buffer, 1024);
+    if(buffer[0] == '\n'){
+      i++;
+    }
+    else{
+      i =0;
+    }
+    e.email += buffer;
   }
 
   

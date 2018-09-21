@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc, char* argv[]){
 
-  int sockID, port, n;
+  int sockID, port, n,i = 0;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[1024];
@@ -82,24 +82,22 @@ int main(int argc, char* argv[]){
   bzero(buffer,1024);
   n = read(sockID, buffer, 1024);  // read data responce
   cout << buffer << endl;
-  /*
-  while(buffer[0] != '\n'){  //loop for email body
-    n= write(sockID, buffer, 1024);  
-    if(n < 0){
-      cout << "ERROR: write to stream\n";
-      exit(0);
-    }  
-    bzero(buffer, 1024);
-    n = read(sockID, buffer, 1024);  
-    if(n < 0){
-      cout << "ERROR: read from stream\n";
-      exit(0);
-    }
-    cout << buffer << endl;
+
+
+
+  while(i < 2){
     bzero(buffer, 1024);
     fgets(buffer, 1024, stdin);
+    if(buffer[0] == '\n'){
+      i++;
+    }
+    else{
+      i = 0;
+    }
+    n = write(sockID, buffer, 1024);
+
   }
-  */
+  
   cout << "ending client\n";
   return 0;
 }
