@@ -12,6 +12,7 @@
 using namespace std;
 
 static void * connection(void * clientSock);
+static int parseCode(char buffer[], string * args);
 
 int main(int argc, char *argv[]){
   if(argc != 2){
@@ -51,11 +52,54 @@ int main(int argc, char *argv[]){
   return 0;
 }
 
+static int parse(char buffer[], string * args){
+  int indexL, indexU;
+  string responce = buffer;
+  indexL = responce.find("helo");
+  indexU = responce.find("HELO");
+  if(indexL == 0 || indexU == 0){
+    *args = responce.substr(5);
+    return 1;
+  }
+
+  indexL = responce.find("mail from");
+  indexU = responce.find("MAIL FROM");
+  if(indexL == 0 || indexU == 0){
+    return 2;
+  }
+
+  indexL = responce.find("rcpt to");
+  indexU = responce.find("RCPT TO");
+  if(indexL == 0 || indexU == 0){
+    return 3;
+  }
+
+  indexL = responce.find("data");
+  indexU = responce.find("DATA");
+  if(indexL == 0 || indexU == 0){
+    return 4;
+  }
+
+  indexL = responce.find("quit");
+  indexU = responce.find("QUIT");
+  if(indexL == 0 || indexU == 0){
+    return 0;
+  }
+
+  indexL = responce.find("\n");
+  if(indexL == 0){
+    return 5;
+  }
+  
+  return -1;
+}
+
 void * connection(void * clientSock){
   int client = *(int*) clientSock;
-  int n, indexL, indexU;
+  int n, cmd;
   char buffer[1024];
-  string responce;
+  string args, msg;
+  
   if(client < 0){
     cout << "ERROR: accept error\n";
     exit(0);
@@ -66,36 +110,42 @@ void * connection(void * clientSock){
     cout << "ERROR: write to stream\n";
     exit(0);
   }
+  
   bzero(buffer, 1024);
   n = read(client, buffer, 1024);
-  //cout << buffer << endl;
-  responce = buffer;
-  //cout << responce << endl;
-  indexL = responce.find("helo");
-  indexU = responce.find("HELO");
-
-  if(indexL != 0 && indexU != 0){
-    n = write(client, "503 closing connection",1024);
+  cmd = parse(buffer, &args);
+  if(cmd == -1){
+    n = write(client, "500 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+  else if(cmd == 1){
+    msg = "250 Hello " + args;
+    n = write(client, msg.c_str(),1024);
+  }
+  else{
+    n = write(client, "503 Closing connection", 1024);
     shutdown(client, SHUT_RDWR);
     return 0;
   }
   
-  bzero(buffer, 1024);
-  n = write(client, "250 Hello",1024);
-
   bzero(buffer, 1024);
   n = read(client, buffer, 1024); // read mail from
-  //cout << buffer << endl;
-  responce = buffer;
-  //cout << responce << endl;
-  indexL = responce.find("mail from");
-  indexU = responce.find("MAIL FROM");
-  if(indexL != 0 && indexU != 0){
-    n = write(client, "503 closing connection", 1024);
+  cmd = parse(buffer, &args);
+  if(cmd == -1){
+    n = write(client, "500 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+  else if(cmd == 2){
+    n= write(client, "250 OK", 1024);
+  }
+  else{
+    n = write(client, "503 Closing connection", 1024);
     shutdown(client, SHUT_RDWR);
     return 0;
   }
   
   bzero(buffer, 1024);
-  n= write(client, "250 OK", 1024);
+  
 }

@@ -39,16 +39,16 @@ int main(int argc, char* argv[]){
     exit(0);
   }
 
-
+  
   n = read(sockID, buffer, 1024);
   if(n < 0){
     cout << "ERROR: read from stream\n";
     exit(0);
   }
   cout << buffer << endl;
+  
   bzero(buffer, 1024);
   fgets(buffer, 1024, stdin);
-  
   n= write(sockID, buffer, 1024);  // write hello
   if(n < 0){
     cout << "ERROR: write to stream\n";
@@ -61,12 +61,35 @@ int main(int argc, char* argv[]){
     exit(0);
   }
   cout << buffer << endl;
+
   bzero(buffer, 1024);
   fgets(buffer, 1024, stdin);
   n = write(sockID, buffer, 1024);  // write mail from
   bzero(buffer,1024);
   n = read(sockID, buffer, 1024);  // read mail from responce
   cout << buffer << endl;
+
+  bzero(buffer, 1024);
+  fgets(buffer, 1024, stdin);
   
+  /*
+  while(buffer[0] != '\n'){  //loop for email body
+    n= write(sockID, buffer, 1024);  
+    if(n < 0){
+      cout << "ERROR: write to stream\n";
+      exit(0);
+    }  
+    bzero(buffer, 1024);
+    n = read(sockID, buffer, 1024);  
+    if(n < 0){
+      cout << "ERROR: read from stream\n";
+      exit(0);
+    }
+    cout << buffer << endl;
+    bzero(buffer, 1024);
+    fgets(buffer, 1024, stdin);
+  }
+  */
+  cout << "ending client\n";
   return 0;
 }
