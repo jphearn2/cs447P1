@@ -8,11 +8,17 @@
 #include <pthread.h>
 #include <strings.h>
 #include <string>
+#include <regex>
 
 using namespace std;
 
 static void * connection(void * clientSock);
 static int parseCode(char buffer[], string * args);
+static bool validEmail(string * email);
+
+typedef struct email{
+  string from, to, subj, email;
+}email;
 
 int main(int argc, char *argv[]){
   if(argc != 2){
@@ -61,7 +67,7 @@ static int parse(char buffer[], string * args){
     *args = responce.substr(5);
     return 1;
   }
-
+  
   indexL = responce.find("mail from");
   indexU = responce.find("MAIL FROM");
   if(indexL == 0 || indexU == 0){
@@ -94,6 +100,16 @@ static int parse(char buffer[], string * args){
   return -1;
 }
 
+bool validEmail(string * email){
+  regex r("<[a-zA-Z0-9]+@([a-zA-Z0-9]+\\.)+[a-zA-Z0-9]+>");
+
+  if(regex_match(*email, r)){
+    return true;
+  }
+
+  return false;
+}
+
 void * connection(void * clientSock){
   int client = *(int*) clientSock;
   int n, cmd;
@@ -110,7 +126,7 @@ void * connection(void * clientSock){
     cout << "ERROR: write to stream\n";
     exit(0);
   }
-  
+  email e;
   bzero(buffer, 1024);
   n = read(client, buffer, 1024);
   cmd = parse(buffer, &args);
@@ -131,7 +147,19 @@ void * connection(void * clientSock){
   
   bzero(buffer, 1024);
   n = read(client, buffer, 1024); // read mail from
+  if(n < 0){
+    cout << "ERROR: read to stream\n";
+    exit(0);
+  }
+  //cout << buffer << endl;
   cmd = parse(buffer, &args);
+  //cout << "";
+  if(!validEmail(&args)){
+    n = write(client, "555 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+  e.from = args;
   if(cmd == -1){
     n = write(client, "500 Closing connection", 1024);
     shutdown(client, SHUT_RDWR);
@@ -147,5 +175,49 @@ void * connection(void * clientSock){
   }
   
   bzero(buffer, 1024);
+  n = read(client, buffer, 1024); // read rcpt to
+  //cout << buffer << endl;
+  cmd = parse(buffer, &args);
+  //cout << cmd << endl;
+  if(!validEmail(&args)){
+    n = write(client, "555 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+  e.to = args;
+  if(cmd == -1){
+    n = write(client, "500 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+  else if(cmd == 3){
+    n= write(client, "250 OK", 1024);
+  }
+  else{
+    n = write(client, "503 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+
+  bzero(buffer, 1024);
+  n = read(client, buffer, 1024); // read Data
+  //cout << buffer << endl;
+  cmd = parse(buffer, &args);
+  //cout << cmd << endl;
+  if(cmd == -1){
+    n = write(client, "500 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+  else if(cmd == 4){
+    n= write(client, "354 ", 1024);
+  }
+  else{
+    n = write(client, "503 Closing connection", 1024);
+    shutdown(client, SHUT_RDWR);
+    return 0;
+  }
+
   
+  return 0;
 }

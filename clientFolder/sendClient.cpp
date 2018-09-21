@@ -71,7 +71,17 @@ int main(int argc, char* argv[]){
 
   bzero(buffer, 1024);
   fgets(buffer, 1024, stdin);
-  
+  n = write(sockID, buffer, 1024);  // write rcpt to
+  bzero(buffer,1024);
+  n = read(sockID, buffer, 1024);  // read rcpt to responce
+  cout << buffer << endl;
+
+  bzero(buffer, 1024);
+  fgets(buffer, 1024, stdin);
+  n = write(sockID, buffer, 1024);  // write data
+  bzero(buffer,1024);
+  n = read(sockID, buffer, 1024);  // read data responce
+  cout << buffer << endl;
   /*
   while(buffer[0] != '\n'){  //loop for email body
     n= write(sockID, buffer, 1024);  
