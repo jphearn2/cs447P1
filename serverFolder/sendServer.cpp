@@ -9,12 +9,14 @@
 #include <strings.h>
 #include <string>
 #include <regex>
+#include <sys/stat.h>
 
 using namespace std;
 
 static void * connection(void * clientSock);
 static int parseCode(char buffer[], string * args);
 static bool validEmail(string * email);
+static void sendEmail(struct email e);
 
 typedef struct email{
   string from, to, email;
@@ -61,6 +63,8 @@ int main(int argc, char *argv[]){
 static int parse(char buffer[], string * args){
   int indexL, indexU;
   string responce = buffer;
+  //responce.erase(responce.size()-2);
+  //cout << "test";
   indexL = responce.find("helo");
   indexU = responce.find("HELO");
   if(indexL == 0 || indexU == 0){
@@ -103,8 +107,8 @@ static int parse(char buffer[], string * args){
 }
 
 bool validEmail(string * email){
-  regex r("<[a-zA-Z0-9]+@([a-zA-Z0-9]+\\.)+[a-zA-Z0-9]+>");
-  cout << *email << endl;
+  regex r("<[a-zA-Z0-9]+@([a-zA-Z0-9]+\\.)+[a-zA-Z0-9]+>\n");
+  //cout << *email << endl;
   if(regex_match(*email, r)){
     return true;
   }
@@ -231,8 +235,19 @@ void * connection(void * clientSock){
       i =0;
     }
     e.email += buffer;
+    cout << buffer;
+  }
+  sendEmail(e);
+  
+  return 0;
+}
+static void sendEmail(struct email e){
+  regex r1("<|>|@([a-zA-Z0-9]+\\.)+[a-zA-Z0-9]+>\n");
+  string dir = "db/" + regex_replace(e.to, r1,"");
+  if(mkdir(dir.c_str(), ACCESSPERMS) == -1){
+    cout << "didn't make dir\n";
   }
 
   
-  return 0;
+
 }
