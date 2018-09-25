@@ -10,6 +10,9 @@
 #include <string>
 #include <regex>
 #include <sys/stat.h>
+#include <fstream>
+#include <dirent.h>
+#include <sstream>
 
 using namespace std;
 
@@ -244,10 +247,28 @@ void * connection(void * clientSock){
 static void sendEmail(struct email e){
   regex r1("<|>|@([a-zA-Z0-9]+\\.)+[a-zA-Z0-9]+>\n");
   string dir = "db/" + regex_replace(e.to, r1,"");
+  stringstream filename;
+  fstream fs;
+  DIR * dr;
+  int count = 0;
+  struct dirent *file;
   if(mkdir(dir.c_str(), ACCESSPERMS) == -1){
     cout << "didn't make dir\n";
   }
+  dr = opendir(dir.c_str());
+  while(file = readdir(dr)){
+    cout << "test\n";
+    count++;
+  }
+  closedir(dr);
+  count--;
+  filename << count;
+  cout << filename.str() << endl;
+  filename << ".email";
+  cout << filename.str() << endl;
+  fs.open(dir + "/" + filename.str(), fstream::out);
 
+
+  fs.close();
   
-
 }
