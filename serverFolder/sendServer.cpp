@@ -13,6 +13,7 @@
 #include <fstream>
 #include <dirent.h>
 #include <sstream>
+#include <time.h>
 
 using namespace std;
 
@@ -250,6 +251,7 @@ static void sendEmail(struct email e){
   stringstream filename;
   fstream fs;
   DIR * dr;
+  time_t currTime = time(NULL);
   int count = 0;
   struct dirent *file;
   if(mkdir(dir.c_str(), ACCESSPERMS) == -1){
@@ -257,17 +259,20 @@ static void sendEmail(struct email e){
   }
   dr = opendir(dir.c_str());
   while(file = readdir(dr)){
-    cout << "test\n";
+    //cout << "test\n";
     count++;
   }
   closedir(dr);
   count--;
   filename << count;
-  cout << filename.str() << endl;
+  //cout << filename.str() << endl;
   filename << ".email";
-  cout << filename.str() << endl;
+  //cout << filename.str() << endl;
   fs.open(dir + "/" + filename.str(), fstream::out);
-
+  fs << "Date:" << ctime(&currTime);
+  fs << "From: " << e.from;
+  fs << "To: " << e.to << endl;
+  fs << e.email;
 
   fs.close();
   
