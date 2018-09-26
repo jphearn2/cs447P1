@@ -45,6 +45,7 @@ int main(int argc, char *argv[]){
   tcp_addr.sin_family = AF_INET;
   tcp_addr.sin_port = htons(tcpPort);
   tcp_addr.sin_addr.s_addr = INADDR_ANY;
+  
   if(bind(tcpSock, (struct sockaddr *) &tcp_addr, sizeof(tcp_addr)) < 0){
     cout << "ERROR: binding error\n";
     exit(0);
