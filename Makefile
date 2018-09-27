@@ -5,3 +5,6 @@ all:
 	g++ -std=c++11 -o recvClient clientFolder/recvClient.cpp
 clean:
 	rm sendServer sendClient recvClient recvServer
+test:
+	g++ -std=c++11 -o stest testServer.cpp
+	g++ -std=c++11 -o ctest testClient.cpp
