@@ -255,6 +255,7 @@ static void sendEmail(struct email e){
   time_t currTime = time(NULL);
   int count = 0;
   struct dirent *file;
+  mkdir("db", ACCESSPERMS);
   if(mkdir(dir.c_str(), ACCESSPERMS) == -1){
     cout << "didn't make dir\n";
   }

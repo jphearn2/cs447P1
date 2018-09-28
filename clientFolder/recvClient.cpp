@@ -43,8 +43,10 @@ int main(int argc, char* argv[]){
     req = get + '\n' + host + '\n' + num +'\n';
     strcpy(buffer,req.c_str());
     //fgets(buffer, 1024, stdin);
-    cout << buffer;
+    //cout << buffer;
     sendto(sockID, buffer, 1024, MSG_CONFIRM, (struct sockaddr *) &servaddr, sizeof(servaddr));
+    n = recvfrom(sockID, buffer, 1024, MSG_WAITALL, (struct sockaddr *) &servaddr, &len);
+
     cout << buffer;
 
     close(sockID);
