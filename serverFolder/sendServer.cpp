@@ -121,7 +121,7 @@ bool validEmail(string * email){
   return false;
 }
 
-void * connection(void * clientSock){
+void * connection2(void * clientSock){
   int i = 0;
   int client = *(int*) clientSock;
   int n, cmd;
@@ -246,6 +246,98 @@ void * connection(void * clientSock){
   
   return 0;
 }
+
+void * connection(void * clientSock){
+  int client = *(int*) clientSock;
+  int n, cmd, order = 1;
+  char buffer[1024];
+  string args, msg;
+
+  if(client < 0){
+    cout << "ERROR: accept error\n";
+    exit(0);
+  }
+
+  bzero(buffer, 1024);
+  n = write(client, "220 smtp.447f18.edu Mail Server Ready", 37);
+  if(n < 0){
+    cout << "ERROR: write to stream\n";
+    exit(0);
+  }
+
+  
+  bzero(buffer, 1024);
+  n = read(client, buffer, 1024);
+  cmd = parse(buffer, &args);
+  email e;
+  while(cmd != 0){
+    
+    if(order == cmd){
+      switch(cmd){
+        case 1:
+          msg = "250 Hello " + args;
+          n = write(client, msg.c_str(),1024);
+          order++;
+          break;
+        case 2:
+          //cout << args << endl;
+          if(!validEmail(&args)){
+            n = write(client, "555 Invalid email", 1024);
+            break;
+          }
+          //cout << args << endl;
+          n= write(client, "250 OK", 1024);
+          e.from = args;
+          //cout << e.from;
+          order++;
+          break;
+        case 3:
+          if(!validEmail(&args)){
+            n = write(client, "555 Invalid email", 1024);
+            break;
+          }
+          n= write(client, "250 OK", 1024);
+          e.to = args;
+          order++;
+          break;
+        case 4:
+          n= write(client, "354 ", 1024);
+          int i = 0;
+          while(i < 2){
+            bzero(buffer, 1024);
+            n = read(client, buffer, 1024);
+            if(buffer[0] == '\n'){
+              i++;
+            }
+            else{
+              i =0;
+            }
+            e.email += buffer;
+            cout << buffer;
+          }
+          //cout << e.to << endl;
+          sendEmail(e);
+          e.to = "";
+          e.from = "";
+          e.email = "";
+          order = 1;
+          return 0;
+      }
+    }
+    else if(cmd != -1){
+      n = write(client, "503 Wrong ordered command", 1024);
+    }
+    else{
+      n = write(client, "500 Nonrecognized command", 1024);
+    }
+    bzero(buffer, 1024);
+    n = read(client, buffer, 1024); 
+    cmd = parse(buffer, &args);
+  }
+
+  return 0;
+}
+
 static void sendEmail(struct email e){
   regex r1("<|>|@([a-zA-Z0-9]+\\.)+[a-zA-Z0-9]+>\n");
   string dir = "db/" + regex_replace(e.to, r1,"");
