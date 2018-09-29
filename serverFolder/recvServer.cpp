@@ -66,15 +66,15 @@ int main(int argc, char* argv[]){
         }
         else{
             if(recvEmail(dbfolder, folder, count) == -1){
-                cout << "bfs";
+                //cout << "bfs";
                 sendto(sockID, "HTTP/1.1 404 folder/file not found\n", 1024, MSG_CONFIRM, (struct sockaddr *) &cliaddr, len);
-                cout << "afs";
+                //cout << "afs";
             }
             //cout << "test\n";
             else{
-                cout << "bss";
+                //cout << "bss";
                 sendto(sockID, "HTTP/1.1 200 OK\n", 1024, MSG_CONFIRM, (struct sockaddr *) &cliaddr, len);
-                cout << "ass";
+                //cout << "ass";
             }
         }
     }
@@ -103,11 +103,11 @@ int recvEmail(string dbfolder, string folder, int count){
     for(int i = 0; i < count; i++){
         filename.str("");
         filename << (fileCount + i) << ".email";
-        cout << dbfolder << filename.str() << endl;
+        //cout << dbfolder << filename.str() << endl;
         fin.open(dbfolder + filename.str(), fstream::in);
-        cout << fin.is_open() << endl;
+        //cout << fin.is_open() << endl;
         if(!fin.is_open()){
-            cout << "max email reached\n";
+            //cout << "max email reached\n";
             fin.close();
             return -1;
         }
@@ -124,12 +124,12 @@ int recvEmail(string dbfolder, string folder, int count){
             fout.close();
         }
         fin.close();
-        cout << "finished writing file " << i << endl;
+        //cout << "finished writing file " << i << endl;
         
     }
     
 
-    cout << "end of writing files\n";
+    //cout << "end of writing files\n";
     return 0;
 }
 
