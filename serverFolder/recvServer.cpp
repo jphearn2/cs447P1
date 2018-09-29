@@ -18,7 +18,7 @@
 using namespace std;
 
 int parser(string * dbfolder, string * folder, char buffer[], int * countN);
-void recvEmail(string dbfolder, string folder, int count);
+int recvEmail(string dbfolder, string folder, int count);
 
 int main(int argc, char* argv[]){
     int sockID, port, n, count;
@@ -62,12 +62,20 @@ int main(int argc, char* argv[]){
 
         ret = parser(&dbfolder, &folder, buffer, &count);
         if(ret == -1){
-            sendto(sockID, "400 bad request\n", 1024, MSG_CONFIRM, (struct sockaddr *) &cliaddr, len);
+            sendto(sockID, "HTTP/1.1 400 bad request\n", 1024, MSG_CONFIRM, (struct sockaddr *) &cliaddr, len);
         }
         else{
-            recvEmail(dbfolder, folder, count);
+            if(recvEmail(dbfolder, folder, count) == -1){
+                cout << "bfs";
+                sendto(sockID, "HTTP/1.1 404 folder/file not found\n", 1024, MSG_CONFIRM, (struct sockaddr *) &cliaddr, len);
+                cout << "afs";
+            }
             //cout << "test\n";
-            sendto(sockID, "HTTP/1.1 200 OK\n", 1024, MSG_CONFIRM, (struct sockaddr *) &cliaddr, len);
+            else{
+                cout << "bss";
+                sendto(sockID, "HTTP/1.1 200 OK\n", 1024, MSG_CONFIRM, (struct sockaddr *) &cliaddr, len);
+                cout << "ass";
+            }
         }
     }
     
@@ -75,26 +83,54 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-void recvEmail(string dbfolder, string folder, int count){
+int recvEmail(string dbfolder, string folder, int count){
     DIR * dr;
     int fileCount = 0;
     struct dirent *file;
     stringstream filename;
-    mkdir(folder.c_str(), ACCESSPERMS);
+    time_t currTime = time(NULL);
 
-    dr = opendir(dbfolder.c_str());
+    mkdir(folder.c_str(), ACCESSPERMS);
+    fstream fin, fout;
+
+    dr = opendir(folder.c_str());
     while(file = readdir(dr)){
         fileCount++;
     }
     fileCount--;
     closedir(dr);
+    
     for(int i = 0; i < count; i++){
         filename.str("");
+        filename << (fileCount + i) << ".email";
+        cout << dbfolder << filename.str() << endl;
+        fin.open(dbfolder + filename.str(), fstream::in);
+        cout << fin.is_open() << endl;
+        if(!fin.is_open()){
+            cout << "max email reached\n";
+            fin.close();
+            return -1;
+        }
+        else{
+            fout.open(folder + filename.str(), fstream::out);
+            fout << "HTTP/1.1 200 OK\nServer: \n";
+            fout << "Last-Modified: " << ctime(&currTime) <<"\nCount: ";
+            fout << count << "\nContent-Type: text/plain\nMessage: " << i << "\n\n";
+            while(!fin.eof()){
+                string line;
+                getline(fin, line);
+                fout << line << "\n";
+            }
+            fout.close();
+        }
+        fin.close();
+        cout << "finished writing file " << i << endl;
         
     }
+    
 
-    //cout << "";
-    return;
+    cout << "end of writing files\n";
+    return 0;
 }
 
 int parser(string * dbfolder, string * folder, char buffer[], int * countN){

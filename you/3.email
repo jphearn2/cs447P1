@@ -1,3 +1,11 @@
+HTTP/1.1 200 OK
+Server: 
+Last-Modified: Fri Sep 28 20:17:20 2018
+
+Count: 3
+Content-Type: text/plain
+Message: 2
+
 Date:Fri Sep 28 20:04:41 2018
 From: <dead@email.com>
 To: <you@email.com>
@@ -9,5 +17,6 @@ well, I did it. I killed myself. I'm not sure why i did it, but i did. in the en
 so i killed myself. looking back, i kind of regret it. i no longer get any joy from anything. i just exist in this weird limbo state. i know that i am, but i dont know what i am.
 
 guess ill fill you in as i learn more.
+
 
 

@@ -1,3 +1,11 @@
+HTTP/1.1 200 OK
+Server: 
+Last-Modified: Fri Sep 28 20:17:20 2018
+
+Count: 3
+Content-Type: text/plain
+Message: 1
+
 Date:Fri Sep 28 20:01:43 2018
 From: <me@email.com>
 To: <you@email.com>
@@ -8,5 +16,6 @@ i know that i shouldn't kill myself, but that dosent keep me from wanting to. ho
 ok maybe that was too dark
 
 goodbye
+
 
 

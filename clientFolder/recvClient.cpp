@@ -45,6 +45,7 @@ int main(int argc, char* argv[]){
     //fgets(buffer, 1024, stdin);
     //cout << buffer;
     sendto(sockID, buffer, 1024, MSG_CONFIRM, (struct sockaddr *) &servaddr, sizeof(servaddr));
+    cout << "test\n";
     n = recvfrom(sockID, buffer, 1024, MSG_WAITALL, (struct sockaddr *) &servaddr, &len);
 
     cout << buffer;
