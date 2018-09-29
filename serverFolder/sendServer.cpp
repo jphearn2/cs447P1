@@ -271,16 +271,18 @@ void * connection(void * clientSock){
   cmd = parse(buffer, &args);
   email e;
   while(cmd != 0){
-    
+    //cout << "start\n";
     if(order == cmd){
       switch(cmd){
         case 1:
+        //cout << "helo";
           msg = "250 Hello " + args;
           n = write(client, msg.c_str(),1024);
           order++;
           break;
         case 2:
           //cout << args << endl;
+          //cout << "mail\n";
           if(!validEmail(&args)){
             n = write(client, "555 Invalid email", 1024);
             break;
@@ -292,6 +294,7 @@ void * connection(void * clientSock){
           order++;
           break;
         case 3:
+          //cout << "rcpt\n";
           if(!validEmail(&args)){
             n = write(client, "555 Invalid email", 1024);
             break;
@@ -301,9 +304,11 @@ void * connection(void * clientSock){
           order++;
           break;
         case 4:
-          n= write(client, "354 ", 1024);
+          cout << "data\n";
+          n= write(client, "354 Send message content; end with <CRLF><CRLF>", 1024);
           int i = 0;
           while(i < 2){
+            //cout << "read\n";
             bzero(buffer, 1024);
             n = read(client, buffer, 1024);
             if(buffer[0] == '\n'){
@@ -313,6 +318,9 @@ void * connection(void * clientSock){
               i =0;
             }
             e.email += buffer;
+            if(i != 2){
+              n= write(client, "", 1024);
+            }
             cout << buffer;
           }
           //cout << e.to << endl;
@@ -321,7 +329,7 @@ void * connection(void * clientSock){
           e.from = "";
           e.email = "";
           order = 1;
-          return 0;
+          n = write(client, "250 OK, message accepted for delivary", 1024);
       }
     }
     else if(cmd != -1){
@@ -334,7 +342,7 @@ void * connection(void * clientSock){
     n = read(client, buffer, 1024); 
     cmd = parse(buffer, &args);
   }
-
+  n= write(client, "221 Bye", 1024);
   return 0;
 }
 

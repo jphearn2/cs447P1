@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <strings.h>
+#include <string.h>
 
 using namespace std;
 
@@ -41,7 +42,21 @@ int main(int argc, char* argv[]){
 
   
   n = read(sockID, buffer, 1024);
-  if(n < 0){
+  cout << buffer << endl;
+
+  while(strcmp(buffer,"221 Bye") != 0){
+    //cout << "start\n";
+    bzero(buffer, 1024);
+    fgets(buffer, 1024, stdin);
+    n= write(sockID, buffer, 1024);
+    bzero(buffer, 1024);
+    n = read(sockID, buffer, 1024);
+    if(buffer[0] != '\0'){
+      cout << buffer << endl;
+    }
+  }
+
+  /*if(n < 0){
     cout << "ERROR: read from stream\n";
     exit(0);
   }
@@ -98,6 +113,6 @@ int main(int argc, char* argv[]){
 
   }
   
-  cout << "ending client\n";
+  cout << "ending client\n";*/
   return 0;
 }
